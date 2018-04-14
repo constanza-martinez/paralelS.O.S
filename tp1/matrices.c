@@ -56,7 +56,7 @@ int main(int argc,char*argv[]){
   for(i=0;i<N;i++){
    for(j=0;j<N;j++){
 	setValor(A,i,j,ORDENXFILAS,1);
-	setValor(B,i,j,ORDENXCOLUMNAS,1);
+	setValor(B,i,j,ORDENXFILAS,1);
    }
   }   
 
