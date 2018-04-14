@@ -48,7 +48,7 @@ int main(int argc,char* argv[]){
    if(i>=j){
     BT[i+N*j]=N;
    }else{
-  //  BT[i+N*j]=0;
+    BT[i+N*j]=0;
    }
 
    C[i*N+j]=0;
