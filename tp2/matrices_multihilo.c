@@ -38,6 +38,7 @@ double dwalltime(){
 }
 
 void * multiplicar (void * ptr);
+
 int main(int argc,char*argv[]){
  int i,j,k;
  int check=1;
@@ -73,9 +74,12 @@ int main(int argc,char*argv[]){
   pthread_attr_init(&attr);
   pthread_t threads [THREADS];
   timetick = dwalltime();
+  printf("Cantidad de filas por proceso %d\n",STRIPES);
+
   for (i = 0; i<THREADS;i++){
       ids[i] = i;
-      pthread_create(&threads[i], &attr, &multiplicar, &ids[i]);
+      pthread_create(&threads[i], NULL, &multiplicar, &ids[i]);
+      printf("Se instanció el proceso %d\n",i);
   }
 
  //Realiza la multiplicacion
@@ -112,26 +116,19 @@ int main(int argc,char*argv[]){
 }
 
 void * multiplicar (void * ptr) {
-  int * p, id;
+  int id = *((int *)ptr);
   int i,j,k;
-  p = (int *) ptr;
-  id=*p;
-  int from=id*STRIPES;
-  int upto=from+STRIPES-1;
   int pilisTKM;
-  printf("\nSOY EL PROCESO VIGA: %d, VOY DE ACA: %d, A ACA %d",id,from,upto);
-  for(i=from*N;i<from * N + N;i++){
-    printf("\nENTRE PEDAZO DE GAY HDP %d",id);
-
-    for(j=from*N;j<from * N + N;j++){
-
+  for(i=STRIPES*id;i<STRIPES*(id+1);i++){
+    for(j=0;j<N;j++){
+    pilisTKM=0;
      for(k=0;k<N;k++){
-       printf("\nte viole EL SEGMENTO %d",id);
 	     pilisTKM = pilisTKM + A[i*N+k] * B[j*N+k];
+       //printf("\n%d",id);
      }
      C[i*N+j]=pilisTKM;
-     pilisTKM=0;
+
      }
    }
-   pthread_exit(0);
+   pthread_exit(NULL);
 }
