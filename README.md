@@ -4,7 +4,7 @@ Repositorio para código
 
 Compilar:
 
-gcc -o ejecutables/<output> tp{1|2|3|4|5}/<input>.c [-pthread] [<compiler options>]*
+gcc -o ejecutables/\<output\> tp{1|2|3|4|5}/\<input\>.c [-pthread] [<compiler options>]*
 
 Plataforma paralela utilizada:
 
