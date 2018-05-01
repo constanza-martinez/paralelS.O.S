@@ -1,15 +1,13 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<pthread.h>
-#define ORDENXFILAS 0
-#define ORDENXCOLUMNAS 1
 
 //Dimension array
 int *A;
+int *PARCIALES;
 int THREADS;
 int ELEMENTOS, N;
-int MAXIMO = -9999;
-int MINIMO = 9999;
+double prom=0.0;
 pthread_mutex_t mutexito;
 
 
@@ -24,13 +22,12 @@ double dwalltime(){
         return sec;
 }
 
-void * busqueda (void * ptr);
+void * promedio (void * ptr);
 
 int main(int argc,char*argv[]){
  int i;
  double timetick;
  time_t t;
- pthread_mutex_init(&mutexito,NULL);
  srand((unsigned) time(&t));
 
  //Controla los argumentos al programa
@@ -43,8 +40,8 @@ int main(int argc,char*argv[]){
 
  //Aloca memoria para las matrices
   A=(int*)malloc(sizeof(int)*N);
-
- //Inicializa las matrices A y B en 1, el resultado sera una matriz con todos sus valores en N
+  PARCIALES=(int*)malloc(sizeof(int)*THREADS);
+ //Inicializa array
   srand((unsigned) time(&t));
   for(i=0;i<N;i++){
    A[i]=rand() % 5000;
@@ -60,42 +57,32 @@ int main(int argc,char*argv[]){
 
   for (i = 0; i<THREADS;i++){
       ids[i] = i;
-      pthread_create(&threads[i], NULL, &busqueda,&ids[i]);
+      pthread_create(&threads[i], NULL, &promedio,&ids[i]);
       printf("Se instanció el proceso %d\n",i);
   }
 
   for (i=0; i < THREADS;i++){
       pthread_join(threads[i],NULL);
   }
-
+  //SUMA TOTAL
+  for (i=0;i < THREADS;i++){
+    prom+=PARCIALES[i];
+  }
+  prom/=N;
  printf("Tiempo en segundos %f\n", dwalltime() - timetick);
- printf("MÍNIMO: %d\n",MINIMO);
- printf("MÁXIMO: %d\n",MAXIMO);
+ printf("Promedio: %f\n",prom);
  free(A);
 
   }
 
 
-void * busqueda (void * ptr) {
+void * promedio (void * ptr) {
   int id = *((int *)ptr);
-  int i;
-  int min = 9999;
-  int max = -9999;
+  int i,sum;
+  sum=0;
   for(i=ELEMENTOS*id;i<ELEMENTOS*(id+1);i++){
-    if(A[i]<min){
-      min=A[i];
-    }
-    if(A[i]>max){
-      max=A[i];
-    }
+    sum+=A[i];
   }
-  pthread_mutex_lock(&mutexito);
-  if (MAXIMO<max) {
-    MAXIMO=max;/* code */
-  }
-  if (MINIMO>min){
-    MINIMO = min;
-  }
-  pthread_mutex_unlock(&mutexito);
+  PARCIALES[id]=sum;
   pthread_exit(NULL);
 }
