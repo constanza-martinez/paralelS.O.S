@@ -6,6 +6,7 @@
 
 //Dimension array
 int *A;
+int *subarreglos;
 int THREADS;
 int ELEMENTOS, N;
 
@@ -38,7 +39,7 @@ int main(int argc,char*argv[]){
   }
 
   A=(int*)malloc(sizeof(int)*N);
-
+  subarreglos=(int*)malloc(sizeof(int)*N);
   srand((unsigned) time(&t));
   for(i=0;i<N;i++){
    A[i]=rand() % 5000;
@@ -71,21 +72,41 @@ int main(int argc,char*argv[]){
 
   }
 int[] mergesort_recv(int lb, int up, int tam){
-
+ int[tam] retornar;
   if(tam>1){
-    int[tam] retornar;
+
     int[] derecha=mergesort_recv(lb,up-tam/2,tam/2);
     int[] izquiera=mergesort_recv(lb+tam/2,up,tam/2);
     int index_derecha=0;
     int index_izquierda=0;
     for (int i=0;i<tam; i++) {
-      if(derecha[index_derecha]==NULL || derecha[index_derecha]>izquiera[index_izquierda]){
-        retornar[i]=;
-        // SEGUIR PLS
+      if(derecha[index_derecha]!=NULL){
+        if(izquiera[index_izquierda!=NULL]){
+          if(derecha[index_derecha]>izquiera[index_izquierda]){
+            retornar[i]=izquiera[index_izquierda];
+            index_izquierda++;
+          else{
+            retornar[i]=derecha[index_derecha];
+            index_derecha++;
+            }
+          }
+        } else {
+          retornar[i]=derecha[index_derecha];
+          index_derecha++;
+        }
+      } else {
+        retornar[i]=izquiera[index_izquierda];
+        index_izquierda++;
       }
+        // SEGUIR PLS
     }
+
+  } else {
+    retornar[tam]=A[lb];
   }
+  return retornar;
 }
+
 
 void * mergesort (void * ptr) {
   int id = *((int *)ptr);
