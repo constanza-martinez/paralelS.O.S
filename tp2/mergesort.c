@@ -1,15 +1,19 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<pthread.h>
+#include<math.h>
 #define MAXIMO 99999
 #define MINIMO -300000
-
+double Log2( double n )
+{
+    // log(n)/log(2) is log2.
+    return log( n ) / log( 2. );
+}
 //Dimension array
 int *A;
 int *subarreglos;
 int THREADS;
 int ELEMENTOS, N;
-
 
 
 //Para calcular tiempo
@@ -110,9 +114,15 @@ int[] mergesort_recv(int lb, int up, int tam){
 
 void * mergesort (void * ptr) {
   int id = *((int *)ptr);
-  int i;
+  int[] subarrelo;
   int lowerBound = ELEMENTOS*id;
   int upperBound = ELEMENTOS*(id+1);
-  mergesort_recv(lowerBound,upperBound,upperBound-lowerBound);
+  int iteraciones = Log2(N);
+  subarrelo=mergesort_recv(lowerBound,upperBound,upperBound-lowerBound);
+  for(int i=1;i<=iteraciones;i=i*2){
+    for(int j=0;j<N;j=j+i*2){
+
+    }
+  }
   pthread_exit(NULL);
 }
