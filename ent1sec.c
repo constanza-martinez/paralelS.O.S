@@ -6,7 +6,7 @@ int *A, *B, *C, *D, *L, AB*, ABC*, LB*, LBD*;
 double dwalltime(){
 	double sec;
 	struct timeval tv;
-	
+
 	gettimeofday(&tv, NULL);
 	sec = tv.tv_sec + tv.tv_usec/1000000.0;
 	return sec;
@@ -20,7 +20,7 @@ int main(int argc,char*argv[]){
 		printf("Datos erroneos %s\n",argv[0] );
 		exit(1);
 	}
-
+// test oush
 	A = (int*)malloc(sizeof(int)*N);
 	B = (int*)malloc(sizeof(int)*N);
 	C = (int*)malloc(sizeof(int)*N);
