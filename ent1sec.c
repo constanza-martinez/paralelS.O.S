@@ -1,4 +1,5 @@
 # include <stdio.h>
+#include <stdlib.h>
 
 int N;
 int *A, *B, *C, *D, *L, AB*, ABC*, LB*, LBD*;
