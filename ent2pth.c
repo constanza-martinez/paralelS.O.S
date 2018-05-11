@@ -36,7 +36,7 @@ void* sum(void* ptr){
 		pares += cant;
 		pthread_mutex_unlock(&mut);
 	}
-	pthread_exit(NULL;)
+	pthread_exit(NULL)
 }
 
 int main (int argc,char*argv[]){
