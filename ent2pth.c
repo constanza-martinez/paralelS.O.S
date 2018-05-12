@@ -53,6 +53,7 @@ int main (int argc,char*argv[]){
 	int ids[NUM_THREADS];
 	pthread_t threads[NUM_THREADS];
 	srand(time(NULL));
+	pthread_mutex_init(&mut, NULL); 
 
 	//pongo solo pares
 	for (i=0;i<N;i++){
