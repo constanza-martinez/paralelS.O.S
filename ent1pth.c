@@ -1,6 +1,7 @@
 # include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 int N=0;
 double *A, *B, *C, *D, *L, *AB, *ABC, *LB, *LBD, *M;
@@ -9,9 +10,6 @@ int NUM_THREADS;
 double l = 0;
 double b = 0;
 int contT = 0;
-int i=0;
-int j=0;
-int k=0;
 
 
 pthread_mutex_t mut;
@@ -38,12 +36,11 @@ double dwalltime(){
 void prom(int base, int tope){
 	double cantl=0;
 	double cantb=0;
+	int i,j;
 
 	for(i=base;i<tope;i++){
 		for(j=0;j<N;j++){
-			if(j<=i){
-				cantl += L[i*N+j];
-			}
+			cantl += L[i*N+j];
 			cantb += B[i+N*j];
 		}
 	}
@@ -61,6 +58,7 @@ void prom(int base, int tope){
 }
 	//multiplico A y L por los promedios
 void mulAL(int base, int tope){
+	int i,j;
  	for (i=base;i<tope;i++){
  		for(j=0;j<N;j++){
  			A[i*N+j]*=l;
@@ -81,6 +79,7 @@ void mul(double * Res,double *mat1, double *mat2, int base, int tope){
 	}
 }
 void sumM(int base, int tope){
+	int i,j;
 	for (i=base;i<tope;i++){
 		for(j=0;j<N;j++){
 			M[i*N+j]= ABC[i*N+j]+LBD[i*N+j];
@@ -92,13 +91,13 @@ void* hilos(void* ptr){
 	int *p ,id;
 	p = (int *)ptr;
 	id = *p;
-	int i,j;
 	int base,tope;
 	base=(N*id)/NUM_THREADS;
 	tope=((id+1)*N)/NUM_THREADS;
 	prom(base,tope);
 	pthread_barrier_wait(&barrera);
 	mulAL(base,tope);
+	pthread_barrier_wait(&barrera);
 	mul(AB,A,B,base,tope);
 	mul(LB,L,B,base,tope);
 	mul(ABC,AB,C,base,tope);
@@ -130,7 +129,7 @@ LB = (double*)malloc(sizeof(double)*N*N);
 LBD = (double*)malloc(sizeof(double)*N*N);
 M = (double*)malloc(sizeof(double)*N*N);
 
-
+	int i,j;
 	int ids[NUM_THREADS];
 	pthread_t threads[NUM_THREADS];
 	pthread_mutex_init(&mut, NULL);
