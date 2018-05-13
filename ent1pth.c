@@ -1,7 +1,7 @@
 # include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <semaphore.h>
+//#include <semaphore.h>
 
 int N=0;
 double *A, *B, *C, *D, *L, *AB, *ABC, *LB, *LBD, *M;
@@ -57,7 +57,7 @@ void prom(int base, int tope){
 		pthread_mutex_unlock(&mut);
 }
 	//multiplico A y L por los promedios
-void mulAL(int base, int tope){
+void escalar(int base, int tope){
 	int i,j;
  	for (i=base;i<tope;i++){
  		for(j=0;j<N;j++){
@@ -96,7 +96,7 @@ void* hilos(void* ptr){
 	tope=((id+1)*N)/NUM_THREADS;
 	prom(base,tope);
 	pthread_barrier_wait(&barrera);
-	mulAL(base,tope);
+	escalar(base,tope);
 	pthread_barrier_wait(&barrera);
 	mul(AB,A,B,base,tope);
 	mul(LB,L,B,base,tope);
