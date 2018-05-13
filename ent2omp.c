@@ -20,7 +20,7 @@ int main (int argc,char*argv[]){
 	int N=0;
 	int pares=0;
 	int NUM_THREADS;
-	int cont=0;
+//	int cont=0;
 
 	if((argc !=3)||((N = atoi(argv[1]))<=0)){
 		printf("Datos erroneos %s\n",argv[0] );
@@ -36,17 +36,17 @@ int main (int argc,char*argv[]){
 
 	timetick = dwalltime();
 
-	#pragma omp parallel for shared(N,V) private(i) reduction(+:pares) reduction(+:cont)
+	#pragma omp parallel for shared(N,V) private(i) reduction(+:pares)
 		for(i=0;i<N;i++){
 			if( V[i] % 2 == 0){
 				pares++;
 			}
-			cont++;
+		//	cont++;
 		}
 
 	printf("Tiempo en segundos %f\n", dwalltime() - timetick);
 	printf("Pares: %d\n", pares);
-	printf("contador de veces que entro al for: %d\n", cont);
+	//printf("contador de veces que entro al for: %d\n", cont);
 	free(V);
 	return 0;
 
