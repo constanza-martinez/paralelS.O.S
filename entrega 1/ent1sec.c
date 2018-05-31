@@ -12,15 +12,15 @@ double dwalltime(){
 	sec = tv.tv_sec + tv.tv_usec/1000000.0;
 	return sec;
 }
-// void imprimirMatriz(double * matriz){
-// 	int i,j;
-// 	for (i = 0; i < N; ++i){
-// 		for (j = 0; j < N; ++j){
-// 			printf("%f |",matriz[i*N+j]);
-// 		}
-// 		printf("\n");
-// 	}
-// }
+void imprimirMatriz(double * matriz){
+	int i,j;
+	for (i = 0; i < N; ++i){
+		for (j = 0; j < N; ++j){
+			printf("%f |",matriz[i*N+j]);
+		}
+		printf("\n");
+	}
+}
 int main(int argc,char*argv[]){
 
 	double timetick;
@@ -55,8 +55,6 @@ int main(int argc,char*argv[]){
 			D[i+N*j] = 1;
 			if(j<=i){
 				L[i*N+j]=1;
-			}else{
-				L[i*N+j]=0;
 			}
 			AB[i*N+j] = 0;
 			ABC[i*N+j] = 0;
@@ -70,8 +68,12 @@ int main(int argc,char*argv[]){
 
 	for (i=0;i<N;i++){
 		for(j=0;j<N;j++){
-			l += L[i*N+j];
 			b += B[i+N*j];
+		}
+	}
+	for (i=0;i<N;i++){
+		for(j=0;j<i;j++){
+			l += L[i*N+j];
 		}
 	}
 	l = l/(N*N);
@@ -83,11 +85,10 @@ int main(int argc,char*argv[]){
 		for(j=0;j<N;j++){
 			A[i*N+j]*=l;
 			if(j<=i){
-				L[i+N*j]*=b;
+				L[i*N+j]*=b;
 			}
 		}
 	}
-
 	//multiplico las matrices y la guardo en la nueva sumando
 	//lo que va quedando
 	for (i=0;i<N;i++){

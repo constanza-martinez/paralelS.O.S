@@ -1,7 +1,7 @@
 # include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-//#include <semaphore.h>
+#include <semaphore.h>
 
 int N=0;
 double *A, *B, *C, *D, *L, *AB, *ABC, *LB, *LBD, *M;
@@ -40,8 +40,12 @@ void prom(int base, int tope){
 
 	for(i=base;i<tope;i++){
 		for(j=0;j<N;j++){
-			cantl += L[i*N+j];
 			cantb += B[i+N*j];
+		}
+	}
+	for(i=base;i<tope;i++){
+		for(j=0;j<i;j++){
+			cantl += L[i*N+j];
 		}
 	}
 		pthread_mutex_lock(&mut);
@@ -57,13 +61,13 @@ void prom(int base, int tope){
 		pthread_mutex_unlock(&mut);
 }
 	//multiplico A y L por los promedios
-void escalar(int base, int tope){
+void mulAL(int base, int tope){
 	int i,j;
  	for (i=base;i<tope;i++){
  		for(j=0;j<N;j++){
  			A[i*N+j]*=l;
  			if(j<=i){
- 				L[i+N*j]*=b;
+ 				L[i*N+j]*=b;
  			}
  		}
  	}
@@ -96,7 +100,7 @@ void* hilos(void* ptr){
 	tope=((id+1)*N)/NUM_THREADS;
 	prom(base,tope);
 	pthread_barrier_wait(&barrera);
-	escalar(base,tope);
+	mulAL(base,tope);
 	pthread_barrier_wait(&barrera);
 	mul(AB,A,B,base,tope);
 	mul(LB,L,B,base,tope);
@@ -145,8 +149,6 @@ M = (double*)malloc(sizeof(double)*N*N);
 			D[i+N*j] = 1;
 			if(j<=i){
 				L[i*N+j]=1;
-			}else{
-				L[i*N+j]=0;
 			}
 			AB[i*N+j] = 0;
 			ABC[i*N+j] = 0;

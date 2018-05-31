@@ -59,6 +59,8 @@ int main(int argc,char*argv[]){
 			D[i+N*j] = 1;
 			if(j<=i){
 				L[i*N+j]=1;
+			}else{
+				L[i*N+j]=0;
 			}
 			AB[i*N+j] = 0;
 			ABC[i*N+j] = 0;
@@ -69,40 +71,35 @@ int main(int argc,char*argv[]){
 	}
 
 	timetick = dwalltime();
-#pragma omp parallel for shared(B) private(i,j) reduction(+:b)
+#pragma omp parallel for shared(L,B) private(i,j) reduction(+:l) reduction(+:b)
 	for (i=0;i<N;i++){
 		for(j=0;j<N;j++){
+			l += L[i*N+j];
 			b += B[i+N*j];
 		}
 	}
+	l = l/(N*N);
 	b = b/(N*N);
-	#pragma omp parallel for shared(L) private(i,j) reduction(+:l)
-		for (i=0;i<N;i++){
-			for(j=0;j<i;j++){
-				l += L[i*N+j];
-			}
-		}
-		l = l/(N*N);
 
 	VALOR_MAX = (N*N) * l;
  //multiplico A y L por los promedios
- #pragma omp parallel for shared(l,A) private(i,j)
+ #pragma omp parallel for shared(l,A) private(i,j,k)
 	for (i=0;i<N;i++){
 		for(j=0;j<N;j++){
 			A[i*N+j]*=l;
 		}
 	}
 
-	#pragma omp parallel for shared(b,L) private(i,j)
+	#pragma omp parallel for shared(b,L) private(i,j,k)
  	for (i=0;i<N;i++){
  		for(j=0;j<i;j++){
- 				L[i*N+j]*=b;
+ 				L[i+N*j]*=b;
  		}
  	}
 	//multiplico las matrices y la guardo en la nueva sumando
 	//lo que va quedando
 
-	#pragma omp parallel for shared(AB,B,A,N) private(i,j,k,res1) 
+	#pragma omp parallel for shared(AB,B,A,N) private(i,j,k,res1) schedule(dynamic)
 	for (i=0;i<N;i++){
 		for(j=0;j<N;j++){
 			for(k=0;k<N;k++){
@@ -113,7 +110,7 @@ int main(int argc,char*argv[]){
 		}
 	}
 
-	#pragma omp parallel for shared(LB,B,L) private(i,j,k,res1)
+	#pragma omp parallel for shared(LB,B,L) private(i,j,k,res1) schedule(dynamic)
 	for (i=0;i<N;i++){
 		for(j=0;j<N;j++){
 				for(k=0;k<N;k++){
@@ -124,7 +121,7 @@ int main(int argc,char*argv[]){
 		}
 	}
 
-	#pragma omp parallel for shared(ABC,AB,C) private(i,j,k,res1)
+	#pragma omp parallel for shared(ABC,AB,C) private(i,j,k,res1) schedule(dynamic)
 	for (i=0;i<N;i++){
 		for(j=0;j<N;j++){
 			for(k=0;k<N;k++){
@@ -134,7 +131,7 @@ int main(int argc,char*argv[]){
 				res1=0;
 		}
 	}
-#pragma omp parallel for shared(LBD,LB,D) private(i,j,k,res1)
+#pragma omp parallel for shared(LBD,LB,D) private(i,j,k,res1) schedule(dynamic)
 	for (i=0;i<N;i++){
 		for(j=0;j<N;j++){
 				for(k=0;k<N;k++){
@@ -145,7 +142,7 @@ int main(int argc,char*argv[]){
 		}
 	}
 
-	#pragma omp parallel for shared(M,ABC,LBD) private(i,j)
+	#pragma omp parallel for shared(M,ABC,LBD) private(i,j) schedule(dynamic)
 	for (i=0;i<N;i++){
 		for(j=0;j<N;j++){
 			M[i*N+j]= ABC[i*N+j]+LBD[i*N+j];
