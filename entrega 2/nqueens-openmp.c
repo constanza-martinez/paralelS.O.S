@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 #pragma omp atomic
 		    number_solutions++;
 		    
-#pragma omp critical
+/*#pragma omp critical
             {
 			    printf("\n");
 			    for (i = 0; i < n; i++)
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
 			    }
 			    printf("\n");
 			}
-		}
+*/		}
 	}
 
     // get end time

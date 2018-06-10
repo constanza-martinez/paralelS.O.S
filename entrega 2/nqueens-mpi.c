@@ -7,6 +7,13 @@
 
 #define MAX_N 16
 int SOLUCIONES = 0;
+int max_iter = 1;
+int num_workers;
+int n;
+MPI_Status estado;
+double start_time, end_time;
+void codigoMaster();
+void codigoWorker();
 
 double dwalltime(){
 	double sec;
@@ -37,23 +44,13 @@ int check_acceptable(int queen_rows[MAX_N], int n)
 	return 1;
 }
 
-int main(int argc, char* argv[]) // READY
-{
-    int n;
-    int max_iter = 1;
-    int num_workers;
+int main(int argc, char* argv[]){
     int id;
-		double start_time, end_time;
 		int i;
 		n = (argc > 1) ? atoi(argv[1]) : 8;
-		for (i = 0; i < n; i++){
-				max_iter *= n;
-		}
 		start_time = dwalltime();
-		int iter;
   	MPI_Init(&argc, &argv);
   	MPI_Comm_size(MPI_COMM_WORLD,&num_workers);
-  	MPI_Status estado;
   	MPI_Comm_rank(MPI_COMM_WORLD,&id);
 		if(id==0){
 			codigoMaster();
@@ -64,43 +61,51 @@ int main(int argc, char* argv[]) // READY
 		return 0;
 }
 
-codigoMaster(){
+void codigoMaster(){
+	for (int 	i = 0; i < n; i++){
+			max_iter *= n;
+	}
 	int pilisRecepcion;
 	int workersDisponibles = 1;
-for (iter =  0; iter < max_iter; iter++){
+for (int iter =  0; iter < max_iter; iter+=(n*n)){
 	int flag=0;
-	MPI_Iprobe(ANY_SOURCE, ANY_TAG, MPI_COMM_WORLD, &flag, &estado); // Hay un Pedido entrante
+	MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &estado); // Hay un Pedido entrante
 	if(flag){
-		MPI_Recv(&pilisRecepcion,1,MPI_INT,ANY_SOURCE,ANY_TAG,MPI_COMM_WORLD,&estado);
+		MPI_Recv(&pilisRecepcion,1,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&estado);
 		workersDisponibles++;
-		if(estado.MPI_TAG==1){
+		if(pilisRecepcion){
 			// PEDIDO CON SOLUCION
-			SOLUCIONES++;
+			SOLUCIONES+=pilisRecepcion;
 		}
-		MPI_Send(&iter,1,MPI_INT,0,1,MPI_COMM_WORLD);
+		MPI_Send(&iter,1,MPI_INT,estado.MPI_SOURCE,0,MPI_COMM_WORLD);
 		workersDisponibles--;
 	} else {
-		int code = iter; // WORKERITO
-		int i;
-		int queen_rows[MAX_N];
-		for (i = 0; i < n; i++){
-			queen_rows[i] = code % n;
-			code /= n;
-		}
-		if (check_acceptable(queen_rows, n))
-		{
-				SOLUCIONES++;
+		int iterar=iter;
+		for (int j = 0; j < n*n; j++) {
+			int code = iterar; // WORKERITO
+			int i;
+			int queen_rows[MAX_N];
+			for (i = 0; i < n; i++){
+				queen_rows[i] = code % n;
+				code /= n;
+			}
+			if (check_acceptable(queen_rows, n)){
+					SOLUCIONES++;
+			}
+			iterar++;
 		}
 	}
 }
-	while(workersDisponibles!=num_workers){
-		MPI_Recv(&pilisRecepcion,1,MPI_INT,ANY_SOURCE,ANY_TAG,MPI_COMM_WORLD,&estado);
+int fin=-1;
+	while(workersDisponibles<num_workers){
+		MPI_Recv(&pilisRecepcion,1,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&estado);
 		workersDisponibles++;
-		if(estado.MPI_TAG==1){
+		if(pilisRecepcion){
 			// PEDIDO CON SOLUCION
 			SOLUCIONES++;
 		}
-		MPI_Send(-1,1,MPI_INT,0,1,MPI_COMM_WORLD);
+
+		MPI_Send(&fin,1,MPI_INT,estado.MPI_SOURCE,0,MPI_COMM_WORLD);
 	}
 
 
@@ -108,26 +113,32 @@ for (iter =  0; iter < max_iter; iter++){
 	end_time = dwalltime();
 	// print results
 	printf("The execution time is %f sec\n", end_time - start_time);
-	printf("Number of found solutions is %d\n", number_solutions);
+	printf("Number of found solutions is %d\n", SOLUCIONES);
 }
 
-codigoWorker(){
+void codigoWorker(){
 	// pedirTarea
 	int tarea=0;
 	MPI_Send(&tarea,1,MPI_INT,0,0,MPI_COMM_WORLD);
 	MPI_Recv(&tarea,1,MPI_INT,0,0,MPI_COMM_WORLD,&estado);
-	while(tarea!=-1){
-		int code = tarea; // WORKERITO
-		int i;
-		int queen_rows[MAX_N];
-		for (i = 0; i < n; i++){
-			queen_rows[i] = code % n;
-			code /= n;
+	while(tarea>-1){
+		int send=0;
+		 // WORKERITO
+		for (int j = 0; j < n*n; j++) {
+			int code = tarea;
+			int queen_rows[MAX_N];
+			for (int i = 0; i < n; i++){
+				queen_rows[i] = code % n;
+				code /= n;
+			}
+
+			if(check_acceptable(queen_rows, n)){
+				send++;
+			}
+			tarea++;
 		}
-		int send;
-		send = (check_acceptable(queen_rows, n) ? 1 : 0;
 		// pedirTarea
-		MPI_Send(&tarea,1,MPI_INT,0,send,MPI_COMM_WORLD);
+		MPI_Send(&send,1,MPI_INT,0,0,MPI_COMM_WORLD);
 		MPI_Recv(&tarea,1,MPI_INT,0,0,MPI_COMM_WORLD,&estado);
 	}
 
