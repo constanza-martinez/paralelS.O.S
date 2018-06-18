@@ -155,7 +155,7 @@ uint64_t master(uint_fast8_t n) {
 void worker(uint_fast8_t n) {
 
 
-  uint_fast64_t num = 0;
+
   //
   // The top level is two fors, to save one bit of symmetry in the enumeration
   // by forcing second queen to be AFTER the first queen.
@@ -174,8 +174,10 @@ void worker(uint_fast8_t n) {
 	MPI_Send(&tarea,1,MPI_INT,0,0,MPI_COMM_WORLD);
 	MPI_Recv(&tarea,1,MPI_INT,0,0,MPI_COMM_WORLD,&estado);
   while(tarea>-1){
+    uint_fast16_t cnt = tarea;
+    uint_fast64_t num = 0; 
     //Codigo workerito
-  for (uint_fast16_t cnt = tarea; cnt < start_cnt; cnt++) {
+  //for (uint_fast16_t cnt = tarea; cnt < cnt+1; cnt++) {
     uint_fast32_t cols[MAXN], posibs[MAXN]; // Our backtracking 'stack'
     uint_fast32_t diagl[MAXN], diagr[MAXN];
     int_fast32_t rest[MAXN]; // number of rows left
@@ -250,9 +252,9 @@ void worker(uint_fast8_t n) {
       posib = posibs[d]; // backtrack ...
       d--;
     }
-  }
+  //}
   // Devuelve el doble porque es mágico. Acá tiene que enviar el resultado y pedir una nueva tarea
-  num*=2;
+  //num*=2;
   MPI_Send(&num,1,MPI_INT,0,0,MPI_COMM_WORLD);
 	MPI_Recv(&tarea,1,MPI_INT,0,0,MPI_COMM_WORLD,&estado);
   }
